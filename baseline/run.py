@@ -2,7 +2,7 @@ import torch
 from torch.autograd import Variable
 import utils
 import niid
-from data_loader import load_data
+from data_loader import load_data, process_data, test_data
 
 if __name__ == "__main__":
     net = niid.FCNet()
@@ -15,17 +15,30 @@ if __name__ == "__main__":
         for step, (x, y, I) in enumerate(loader):
             output = net(x)
             lossb = niid.Lossb(utils.batch_size, utils.alpha)
-            optimizer_w = torch.optim.Adam(lossb.parameters(), lr=utils.lr)
+            optimizer_w = torch.optim.RMSprop([lossb.wn], lr=utils.lr_w)
             wfi = Variable(net.wfi, requires_grad=False)
             
             for i in range(utils.rounds_w):
                 loss = lossb(wfi, I)
                 optimizer_w.zero_grad()
                 loss.backward()
-                optimizer_w.step() 
+                optimizer_w.step()
+                d = lossb.update()
+                if d < utils.threshold:
+                    break
             
-            w = Variable(lossb.W, requires_grad= False)
-            loss = lossp(wfi, output, w)
-            optimizer_net.zero_grad()           # clear gradients for this training step
-            loss.backward()                 # backpropagation, compute gradients
-            optimizer_net.step()  
+            print(lossb.W)
+            w = Variable(lossb.W, requires_grad=False)
+            loss = lossp(wfi, output, y, w)
+            optimizer_net.zero_grad()
+            loss.backward()
+            optimizer_net.step()
+
+            print("epoch {} step {}, loss = {}".format(epoch, step, loss)) 
+        
+        (X, Y) = test_data()
+        output = net(X)
+        prediction = torch.argmax(output, dim=1)
+        correct = (prediction == Y).sum().float()
+
+        print("epoch {}, accuracy = {}", correct / utils.train_size)

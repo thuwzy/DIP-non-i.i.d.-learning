@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import utils
+import numpy as np
 
 class ConvNet(nn.Module):
 
@@ -69,13 +70,14 @@ class FCNet(nn.Module):
             nn.Linear(50, 10),
             nn.Tanh()
         )
-        self.out = nn.Softmax()
+        self.out = nn.Softmax(dim=1)
         self.wfi = None
 
     def forward(self, x):
         x = self.fc1(x)
         x = self.fc2(x)
         self.wfi = x
+        #print(x.shape)
         return self.out(x)
 
 class Lossb(nn.Module):
@@ -85,20 +87,29 @@ class Lossb(nn.Module):
         w = 1.0 / n
         self.n = n
         self.alpha = alpha
-        self.w9 = Variable(w * torch.ones((n - 1, 1)), requires_grad=True)
-        self.w10 = torch.ones((1,1)) - torch.sum(self.w9)
-        self.W = torch.cat((self.w9, self.w10))
+        self.wn = Variable(w * torch.ones((n - 1, 1)), requires_grad=True)
+        self.W = torch.cat((self.wn, torch.ones((1,1)) - torch.sum(self.wn)))
+        self.diff = torch.Tensor(self.W)
 
     def forward(self, x_out, I):
         loss = 0.0
         for i in range(utils.context_size):
-            gx = torch.transpose(x_out)[torch.arange(x_out.size(0))!=i]
-            wt = torch.transpose(self.W)
-            ij = I[[i]]
+            gx = torch.transpose(x_out, 1, 0)
+            gx = gx[torch.arange(gx.size(0))!=i]
+            wt = torch.transpose(self.W, 1, 0)
+            ij = I[:, i]
             ten1 = torch.matmul(gx, (self.W * ij)) / torch.matmul(wt, ij)
             ten2 = torch.matmul(gx, (self.W * (1 - ij))) / torch.matmul(wt, 1 - ij)
             loss += torch.norm(ten1 - ten2) ** 2
         loss += self.alpha * (torch.norm(self.W) ** 2)
+        return loss
+
+    def update(self):
+        new_w = torch.cat((self.wn, torch.ones((1,1)) - torch.sum(self.wn)))
+        self.diff = new_w - self.W
+        self.W = new_w
+        diff = torch.norm(self.diff, p=1)
+        return diff
 
 class Lossp(nn.Module):
 
@@ -107,7 +118,7 @@ class Lossp(nn.Module):
         self.lam = lam
 
     def forward(self, gout, fout, y, W):
-        lossq = lam * (torch.norm(gout)**2)
+        lossq = -utils.lam * (torch.norm(gout)**2)
         loss = torch.sum(W * torch.log(torch.sum((fout * y), dim=1))) + lossq
         return loss
 
