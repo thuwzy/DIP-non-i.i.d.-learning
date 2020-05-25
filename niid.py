@@ -57,9 +57,6 @@ class ConvNet(nn.Module):
         self.g_fi = x
         return self.out(x)
 
-convnet = ConvNet()
-print(convnet)
-
 class FCNet(nn.Module):
 
     def __init__(self):
@@ -83,10 +80,10 @@ class FCNet(nn.Module):
 
 class Lossb(nn.Module):
 
-    def __init__(self, n, alpha, p):
+    def __init__(self, n, alpha):
+        super(Lossb, self).__init__()
         w = 1.0 / n
         self.n = n
-        self.p = p
         self.alpha = alpha
         self.w9 = Variable(w * torch.ones((n - 1, 1)), requires_grad=True)
         self.w10 = torch.ones((1,1)) - torch.sum(self.w9)
@@ -111,6 +108,6 @@ class Lossp(nn.Module):
 
     def forward(self, gout, fout, y, W):
         lossq = lam * (torch.norm(gout)**2)
-        loss = torch.sum(W * torch.log(torch.sum((gout * y), dim=1))) + lossq
+        loss = torch.sum(W * torch.log(torch.sum((fout * y), dim=1))) + lossq
         return loss
 
