@@ -91,13 +91,14 @@ class Lossb(nn.Module):
         self.W = torch.cat((self.wn, torch.ones((1,1)) - torch.sum(self.wn)))
         self.diff = torch.Tensor(self.W)
 
-    def forward(self, x_out, I):
+    def forward(self, x_out, x):
         loss = 0.0
-        for i in range(utils.context_size):
+        for i in range(utils.feature_size):
+            ij = (x[:, i] > 0.5).float()
+
             gx = torch.transpose(x_out, 1, 0)
             gx = gx[torch.arange(gx.size(0))!=i]
             wt = torch.transpose(self.W, 1, 0)
-            ij = I[:, i]
             ten1 = torch.matmul(gx, (self.W * ij)) / torch.matmul(wt, ij)
             ten2 = torch.matmul(gx, (self.W * (1 - ij))) / torch.matmul(wt, 1 - ij)
             loss += torch.norm(ten1 - ten2) ** 2

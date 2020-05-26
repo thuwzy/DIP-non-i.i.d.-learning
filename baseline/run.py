@@ -12,14 +12,14 @@ if __name__ == "__main__":
 
     loader = load_data()
     for epoch in range(utils.epoch):
-        for step, (x, y, I) in enumerate(loader):
+        for step, (x, y, _) in enumerate(loader):
             output = net(x)
             lossb = niid.Lossb(utils.batch_size, utils.alpha)
             optimizer_w = torch.optim.RMSprop([lossb.wn], lr=utils.lr_w)
             wfi = Variable(net.wfi, requires_grad=False)
             
             for i in range(utils.rounds_w):
-                loss = lossb(wfi, I)
+                loss = lossb(wfi, x)
                 optimizer_w.zero_grad()
                 loss.backward()
                 optimizer_w.step()
@@ -27,7 +27,7 @@ if __name__ == "__main__":
                 if d < utils.threshold:
                     break
             
-            print(lossb.W)
+            # print(lossb.W)
             w = Variable(lossb.W, requires_grad=False)
             loss = lossp(wfi, output, y, w)
             optimizer_net.zero_grad()
@@ -38,7 +38,7 @@ if __name__ == "__main__":
         
         (X, Y) = test_data()
         output = net(X)
-        prediction = torch.argmax(output, dim=1)
+        prediction = torch.argmax(output, dim=1).float()
         correct = (prediction == Y).sum().float()
 
         print("epoch {}, accuracy = {}", correct / utils.train_size)

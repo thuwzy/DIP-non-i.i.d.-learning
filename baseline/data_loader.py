@@ -6,9 +6,9 @@ import torch.utils.data as Data
 data = np.load("../../course_train.npy")[:utils.train_size]
 
 def process_data():
-    X = torch.Tensor(data[:, :-2])
-    Y = torch.Tensor(np.eye(utils.class_size)[data[:, -1].astype("int32")])
-    C = torch.Tensor(np.eye(utils.context_size)[data[:, -2].astype("int32")])
+    X = torch.Tensor(data[:, :-2])                                              # Resnet features
+    Y = torch.Tensor(np.eye(utils.class_size)[data[:, -1].astype("int32")])     # class labels
+    C = torch.Tensor(np.eye(utils.context_size)[data[:, -2].astype("int32")])   # context labels
     print(X.shape, Y.shape, C.shape)
     return (X, Y, C)
 
