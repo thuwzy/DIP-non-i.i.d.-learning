@@ -4,60 +4,6 @@ from torch.autograd import Variable
 import utils
 import numpy as np
 
-class ConvNet(nn.Module):
-
-    def __init__(self):
-        super(ConvNet, self).__init__()
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(
-                in_channels=3,
-                out_channels=64,
-                kernel_size=5,
-                stride=1,
-                padding=2,
-            ),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),
-        )
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(64, 128, 5, 1, 2),
-            nn.ReLU(), 
-            nn.MaxPool2d(2), 
-        )
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(256, 512, 5, 1, 2),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-        )
-        self.conv4 = nn.Sequential(
-            nn.Conv2d(512, 1024, 5, 1, 2),
-            nn.ReLU(),
-            nn.MaxPool2d(2),
-        )
-        self.fc1 = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(4096, 512),
-            nn.ReLU(),
-        )
-        self.fc2 = nn.Sequential(
-            nn.Linear(512, 50),
-            nn.Tanh(),
-        )
-        self.fc3 = nn.Sequential(
-            nn.Linear(50, 10),
-        )
-        self.out = nn.Softmax()
-        self.g_fi = None
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
-        x = self.fc3(self.fc2(self.fc1(x)))
-        self.g_fi = x
-        return self.out(x)
-
 class FCNet(nn.Module):
 
     def __init__(self):
@@ -67,8 +13,8 @@ class FCNet(nn.Module):
             nn.ReLU()
         )
         self.fc2 = nn.Sequential(
-            nn.Linear(50, 10),
-            nn.Tanh()
+            nn.Linear(50, 10)
+            #nn.Tanh()
         )
         self.out = nn.Softmax(dim=1)
         self.wfi = None
