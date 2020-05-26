@@ -18,7 +18,7 @@ def process_data():
     C = torch.zeros(_len, utils.context_size).scatter_(1, C, 1)
     # Y = torch.Tensor(np.eye(utils.class_size)[Y])     # class labels
     # C = torch.Tensor(np.eye(utils.context_size)[C])   # context labels
-    print(Y)
+    #print(Y)
     print(X.shape, Y.shape, C.shape)
     return (X, Y, C)
 
