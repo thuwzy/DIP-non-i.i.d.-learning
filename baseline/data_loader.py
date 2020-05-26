@@ -3,7 +3,7 @@ import utils
 import torch
 import torch.utils.data as Data
 
-data = np.load("../../course_train.npy")[:utils.train_size]
+data = np.load("../course_train.npy")[:utils.train_size]
 
 def process_data():
     X = torch.Tensor(data[:, :-2])                                              # Resnet features
