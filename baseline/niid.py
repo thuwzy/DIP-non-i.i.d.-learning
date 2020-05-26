@@ -9,14 +9,15 @@ class FCNet(nn.Module):
     def __init__(self):
         super(FCNet, self).__init__()
         self.fc1 = nn.Sequential(
-            nn.Linear(512, 50),
+            nn.Linear(512, 256),
             nn.ReLU()
         )
         self.fc2 = nn.Sequential(
-            nn.Linear(50, 10)
+            nn.Linear(256, 10)
             #nn.Tanh()
         )
-        self.out = nn.Softmax(dim=1)
+        #self.out = nn.Softmax(dim=1)
+        
         self.wfi = None
 
     def forward(self, x):
@@ -24,7 +25,7 @@ class FCNet(nn.Module):
         x = self.fc2(x)
         self.wfi = x
         #print(x.shape)
-        return self.out(x)
+        return x#self.out(x)
 
 class Lossb(nn.Module):
 
