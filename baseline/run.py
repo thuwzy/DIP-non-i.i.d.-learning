@@ -8,7 +8,7 @@ if __name__ == "__main__":
     net = niid.FCNet()
     print(net.parameters())
     optimizer_net = torch.optim.Adam(net.parameters(), lr=utils.lr)
-    lossp = niid.Lossp(utils.lam)
+    # lossp = niid.Lossp(utils.lam)
 
     loader = load_data()
     for epoch in range(utils.epoch):
@@ -47,13 +47,13 @@ if __name__ == "__main__":
         (X, Y) = test_data()
         output = net(X)
         prediction = torch.argmax(output, dim=1).float()
-        correct = (prediction == Y).sum().float()
+        correct = (prediction == Y.float()).sum().float()
 
         print("test acc =", correct / len(Y))
 
         (X, Y) = train_data()
         output = net(X)
         prediction = torch.argmax(output, dim=1).float()
-        correct = (prediction == Y).sum().float()
+        correct = (prediction == Y.float()).sum().float()
 
         print("train acc =", correct / len(Y))
