@@ -15,8 +15,8 @@ if __name__ == "__main__":
         optimizers.append(torch.optim.Adam(nets[i].parameters(), lr=utils.lr))
     
     for epoch in range(utils.epoch):
-        (X_test, Y_test) = test_data()
-        (X_train, Y_train) = train_data()
+        (X_test, Y_test, _) = test_data(test=0)
+        (X_train, Y_train, _) = train_data(test=0)
 
         preds_test = torch.LongTensor([])
         preds_train = torch.LongTensor([])

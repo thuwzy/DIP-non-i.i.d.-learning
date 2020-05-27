@@ -41,7 +41,7 @@ if __name__ == "__main__":
             # loss.backward()
             # optimizer_net.step()
 
-            print("epoch {} step {}, loss = {}".format(epoch, step, loss)) 
+            #print("epoch {} step {}, loss = {}".format(epoch, step, loss)) 
         
         print("-----epoch[{}]-----".format(epoch))
         (X, Y) = test_data()
