@@ -5,7 +5,7 @@ import torch.utils.data as Data
 
 data = np.load("../course_train.npy")[:utils.train_size]
 
-def process_data(context_label=None, test=1):
+def process_data(context_label=None, test=0):
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])                                          # Resnet features
@@ -33,7 +33,7 @@ def process_data(context_label=None, test=1):
     # C = torch.Tensor(np.eye(utils.context_size)[C])   # context labels
     return (X, Y, C)
 
-def train_data(test=1):
+def train_data(test=0):
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])
@@ -48,7 +48,7 @@ def train_data(test=1):
         C = torch.LongTensor(data[::2, -2])       
     return (X, Y, C)
 
-def test_data(test=1):
+def test_data(test=0):
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])
@@ -64,8 +64,8 @@ def test_data(test=1):
     return (X, Y, C)
 
 
-def load_data():
-    X, Y, C = process_data()
+def load_data(test=0):
+    X, Y, C = process_data(test=test)
     torch_dataset = Data.TensorDataset(X, Y, C)
     loader = Data.DataLoader(
         dataset=torch_dataset,
