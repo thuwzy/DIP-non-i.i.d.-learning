@@ -4,6 +4,58 @@ from torch.autograd import Variable
 import utils
 import numpy as np
 
+class NIIDNet(nn.Module):
+
+    def __init__(self):
+        super(NIIDNet, self).__init__()
+        self.fc1 = nn.Sequential(
+            nn.Linear(512, 256),
+            nn.ReLU()
+        )
+        self.fc2_1 = nn.Sequential(
+            nn.Linear(256, 10)
+        )
+        self.fc2_2 = nn.Sequential(
+            nn.Linear(256, 10)
+        )
+        #self.out = nn.Softmax(dim=1)
+        
+        self.wfi = None
+
+    def forward1(self, x):
+        x = self.fc1(x)
+        x = self.fc2_1(x)
+        return x
+
+    def forward2(self, x):
+        x = self.fc1(x)
+        x = self.fc2_2(x)
+        return x
+    
+    def freeze1(self):
+        for i in self.fc1.parameters():
+            i.requires_grad=False
+        for i in self.fc2_1.parameters():
+            i.requires_grad=False
+        for i in self.fc2_2.parameters():
+            i.requires_grad=True
+
+    def freeze2(self):
+        for i in self.fc1.parameters():
+            i.requires_grad=True
+        for i in self.fc2_1.parameters():
+            i.requires_grad=True
+        for i in self.fc2_2.parameters():
+            i.requires_grad=False
+    
+    def warm(self):
+        for i in self.fc1.parameters():
+            i.requires_grad=True
+        for i in self.fc2_1.parameters():
+            i.requires_grad=True
+        for i in self.fc2_2.parameters():
+            i.requires_grad=True        
+
 class FCNet(nn.Module):
 
     def __init__(self):

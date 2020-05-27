@@ -3,40 +3,61 @@ import utils
 import torch
 import torch.utils.data as Data
 
+test = 1
 data = np.load("../course_train.npy")[:utils.train_size]
 
 def process_data():
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])                                          # Resnet features
-    X=X[(C<utils.N_train_context).nonzero()].squeeze(1)
-    Y=Y[(C<utils.N_train_context).nonzero()]
-    C=C[(C<utils.N_train_context).nonzero()]
+    if test == 0:
+        X=X[(C<utils.N_train_context).nonzero()].squeeze(1)
+        Y=Y[(C<utils.N_train_context).nonzero()]
+        C=C[(C<utils.N_train_context).nonzero()]
+    else:
+        _len = len(C)
+        X = torch.Tensor(data[::2, :-2])
+        Y = torch.LongTensor(data[::2, -1]).unsqueeze(1) 
+        C = torch.LongTensor(data[::2, -2]).unsqueeze(1) 
+
 
     _len = len(Y)
     Y = torch.zeros(_len, utils.class_size).scatter_(1, Y, 1)
     C = torch.zeros(_len, utils.context_size).scatter_(1, C, 1)
     # Y = torch.Tensor(np.eye(utils.class_size)[Y])     # class labels
     # C = torch.Tensor(np.eye(utils.context_size)[C])   # context labels
-    #print(Y)
-    print(X.shape, Y.shape, C.shape)
+    return (X, Y, C)
+
+def train_data():
+    X = torch.Tensor(data[:, :-2])
+    Y = torch.LongTensor(data[:, -1])   
+    C = torch.LongTensor(data[:, -2])                                          # Resnet features
+    if test == 0:
+        X=X[(C<utils.N_train_context).nonzero()].squeeze(1)
+        Y=Y[(C<utils.N_train_context).nonzero()].squeeze(1)
+        C=C[(C<utils.N_train_context).nonzero()].squeeze(1)
+    else:
+        _len = len(C)
+        X = torch.Tensor(data[::2, :-2])
+        Y = torch.LongTensor(data[::2, -1])   
+        C = torch.LongTensor(data[::2, -2])       
     return (X, Y, C)
 
 def test_data():
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])                                          # Resnet features
-    X=X[(C>=utils.N_train_context).nonzero()].squeeze(1)
-    Y=Y[(C>=utils.N_train_context).nonzero()].squeeze(1)
-    return (X, Y)
+    if test == 0:
+        X=X[(C>=utils.N_train_context).nonzero()].squeeze(1)
+        Y=Y[(C>=utils.N_train_context).nonzero()].squeeze(1)
+        C=C[(C>=utils.N_train_context).nonzero()].squeeze(1)
+    else:
+        _len = len(C)
+        X = torch.Tensor(data[1::2, :-2])
+        Y = torch.LongTensor(data[1::2, -1])   
+        C = torch.LongTensor(data[1::2, -2]) 
+    return (X, Y, C)
 
-def train_data():
-    X = torch.Tensor(data[:, :-2])
-    Y = torch.LongTensor(data[:, -1])   
-    C = torch.LongTensor(data[:, -2])                                          # Resnet features
-    X=X[(C<utils.N_train_context).nonzero()].squeeze(1)
-    Y=Y[(C<utils.N_train_context).nonzero()].squeeze(1)
-    return (X, Y)
 
 def load_data():
     X, Y, C = process_data()
