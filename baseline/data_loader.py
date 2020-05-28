@@ -16,9 +16,13 @@ def process_data(context_label=None, test=0):
             C=C[(C<utils.N_train_context).nonzero()]
         else:
             assert(context_label < utils.context_size)
-            X = X[(C == context_label).nonzero()].squeeze(1)
-            Y = Y[(C == context_label).nonzero()]
-            C = C[(C == context_label).nonzero()]
+            # X = X[(C == context_label).nonzero()].squeeze(1)
+            # Y = Y[(C == context_label).nonzero()]
+            # C = C[(C == context_label).nonzero()]
+            X = X[((C != context_label) & (C < utils.N_train_context)).nonzero()].squeeze(1)
+            Y = Y[((C != context_label) & (C < utils.N_train_context)).nonzero()]
+            C = C[((C != context_label) & (C < utils.N_train_context)).nonzero()]
+            
     else:
         _len = len(C)
         X = torch.Tensor(data[::2, :-2])
