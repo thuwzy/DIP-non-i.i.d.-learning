@@ -46,10 +46,19 @@ if __name__ == "__main__":
             preds_train = torch.cat((preds_train, pred.unsqueeze(0)))
         
         print("-----epoch[{}]-----".format(epoch))
+
+        for i, pred in enumerate(preds_test):
+            correct = (pred == Y_test).sum().float()
+            print("class", i, "test acc =", correct / len(Y_test))
+
         pred = torch.mode(preds_test, 0)[0]
         correct = (pred == Y_test).sum().float()
 
         print("test acc =", correct / len(Y_test))
+
+        for i, pred in enumerate(preds_train):
+            correct = (pred == Y_train).sum().float()
+            print("class", i, "train acc =", correct / len(Y_train))
 
         pred = torch.mode(preds_train, 0)[0]
         correct = (pred == Y_train).sum().float()
