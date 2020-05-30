@@ -4,6 +4,8 @@ import utils
 import niid
 from data_loader import load_data, process_data, test_data, train_data
 
+EPOCH = 100
+
 if __name__ == "__main__":
     net = niid.FCNet()
     print(net.parameters())
@@ -11,7 +13,7 @@ if __name__ == "__main__":
     # lossp = niid.Lossp(utils.lam)
 
     loader = load_data()
-    for epoch in range(utils.epoch):
+    for epoch in range(EPOCH):
         for step, (x, y, _) in enumerate(loader):
             output = net(x)
             CELoss = torch.nn.CrossEntropyLoss()
@@ -44,14 +46,14 @@ if __name__ == "__main__":
             #print("epoch {} step {}, loss = {}".format(epoch, step, loss)) 
         
         print("-----epoch[{}]-----".format(epoch))
-        (X, Y) = test_data()
+        (X, Y, _) = test_data()
         output = net(X)
         prediction = torch.argmax(output, dim=1).float()
         correct = (prediction == Y.float()).sum().float()
 
         print("test acc =", correct / len(Y))
 
-        (X, Y) = train_data()
+        (X, Y, _) = train_data()
         output = net(X)
         prediction = torch.argmax(output, dim=1).float()
         correct = (prediction == Y.float()).sum().float()

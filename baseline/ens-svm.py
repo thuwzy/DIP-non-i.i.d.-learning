@@ -65,5 +65,28 @@ def ensemble():
 			acc_t += 1
 	print("ensemble acc:", acc_t/len(test_label) )
 
+def pure_svm():
+	data = np.load("../course_train.npy")
+	X = data[:, :-2]
+	Y = data[:, -1]
+	C = data[:, -2]
+
+	train_context_num = 7
+	X_train = X[C < train_context_num]
+	Y_train = Y[C < train_context_num]
+	
+	X_test = X[C >= train_context_num]
+	Y_test = Y[C >= train_context_num]
+
+	clf = svm.LinearSVC()
+	clf = clf.fit(X_train, Y_train)
+	pred = clf.predict(X_test)
+
+	acc = (pred == Y_test).sum() / len(Y_test)
+
+	print('test acc:', acc)
+
+
 if __name__ == "__main__":
 	ensemble()
+	# pure_svm()
