@@ -5,7 +5,7 @@ feature_size = 512
 
 train_size = 4096
 batch_size = 256
-epoch = 300
+epoch = 100
 lr_w = 0.0002
 lr = 0.002
 alpha = 1e4

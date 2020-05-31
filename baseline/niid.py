@@ -16,7 +16,9 @@ class NIIDNet(nn.Module):
             nn.Linear(256, 10)
         )
         self.fc2_2 = nn.Sequential(
-            nn.Linear(256, 10)
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 10)
         )
         #self.out = nn.Softmax(dim=1)
         
@@ -34,7 +36,7 @@ class NIIDNet(nn.Module):
     
     def freeze1(self):
         for i in self.fc1.parameters():
-            i.requires_grad=False
+            i.requires_grad=True
         for i in self.fc2_1.parameters():
             i.requires_grad=False
         for i in self.fc2_2.parameters():
@@ -42,7 +44,7 @@ class NIIDNet(nn.Module):
 
     def freeze2(self):
         for i in self.fc1.parameters():
-            i.requires_grad=True
+            i.requires_grad=False
         for i in self.fc2_1.parameters():
             i.requires_grad=True
         for i in self.fc2_2.parameters():

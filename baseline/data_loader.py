@@ -3,7 +3,7 @@ import utils
 import torch
 import torch.utils.data as Data
 
-test = 1
+test = 0
 data = np.load("../course_train.npy")[:utils.train_size]
 
 def process_data():
@@ -11,52 +11,50 @@ def process_data():
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])                                          # Resnet features
     if test == 0:
-        X=X[(C<utils.N_train_context).nonzero()].squeeze(1)
-        Y=Y[(C<utils.N_train_context).nonzero()]
-        C=C[(C<utils.N_train_context).nonzero()]
+        _X=X[((C+Y)%2).nonzero()].squeeze(1)
+        _Y=Y[((C+Y)%2).nonzero()]
+        _C=C[((C+Y)%2).nonzero()]
     else:
         _len = len(C)
-        X = torch.Tensor(data[::2, :-2])
-        Y = torch.LongTensor(data[::2, -1]).unsqueeze(1) 
-        C = torch.LongTensor(data[::2, -2]).unsqueeze(1) 
+        _X = torch.Tensor(data[::2, :-2])
+        _Y = torch.LongTensor(data[::2, -1]).unsqueeze(1) 
+        _C = torch.LongTensor(data[::2, -2]).unsqueeze(1) 
 
 
-    _len = len(Y)
-    Y = torch.zeros(_len, utils.class_size).scatter_(1, Y, 1)
-    C = torch.zeros(_len, utils.context_size).scatter_(1, C, 1)
-    # Y = torch.Tensor(np.eye(utils.class_size)[Y])     # class labels
-    # C = torch.Tensor(np.eye(utils.context_size)[C])   # context labels
-    return (X, Y, C)
+    _len = len(_Y)
+    _Y = torch.zeros(_len, utils.class_size).scatter_(1, _Y, 1)
+    _C = torch.zeros(_len, utils.context_size).scatter_(1, _C, 1)
+    return (_X, _Y, _C)
 
 def train_data():
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])                                          # Resnet features
     if test == 0:
-        X=X[(C<utils.N_train_context).nonzero()].squeeze(1)
-        Y=Y[(C<utils.N_train_context).nonzero()].squeeze(1)
-        C=C[(C<utils.N_train_context).nonzero()].squeeze(1)
+        _X=X[((C+Y)%2).nonzero()].squeeze(1)
+        _Y=Y[((C+Y)%2).nonzero()].squeeze(1)
+        _C=C[((C+Y)%2).nonzero()].squeeze(1)
     else:
         _len = len(C)
-        X = torch.Tensor(data[::2, :-2])
-        Y = torch.LongTensor(data[::2, -1])   
-        C = torch.LongTensor(data[::2, -2])       
-    return (X, Y, C)
+        _X = torch.Tensor(data[::2, :-2])
+        _Y = torch.LongTensor(data[::2, -1])   
+        _C = torch.LongTensor(data[::2, -2])       
+    return (_X, _Y, _C)
 
 def test_data():
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])                                          # Resnet features
     if test == 0:
-        X=X[(C>=utils.N_train_context).nonzero()].squeeze(1)
-        Y=Y[(C>=utils.N_train_context).nonzero()].squeeze(1)
-        C=C[(C>=utils.N_train_context).nonzero()].squeeze(1)
+        _X=X[((C+Y+1)%2).nonzero()].squeeze(1)
+        _Y=Y[((C+Y+1)%2).nonzero()].squeeze(1)
+        _C=C[((C+Y+1)%2).nonzero()].squeeze(1)
     else:
         _len = len(C)
-        X = torch.Tensor(data[1::2, :-2])
-        Y = torch.LongTensor(data[1::2, -1])   
-        C = torch.LongTensor(data[1::2, -2]) 
-    return (X, Y, C)
+        _X = torch.Tensor(data[1::2, :-2])
+        _Y = torch.LongTensor(data[1::2, -1])   
+        _C = torch.LongTensor(data[1::2, -2]) 
+    return (_X, _Y, _C)
 
 
 def load_data():
