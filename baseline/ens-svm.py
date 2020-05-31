@@ -1,53 +1,69 @@
 from sklearn import tree
 from sklearn import svm
 import numpy as np
+import random
+import sys
+
+all_data = np.load('../course_train.npy')
+
+def get_data():
+	x = {}
+	y = {}
+	test_x = []
+	test_y = []
+	test_con = []
+	train_con = []
+	for i in range(10):
+		train_con.append(i)
+	for i in range(3):
+		j = random.randint(0, 9-i)
+		test_con.append(train_con[j])
+		del train_con[j]
+	for i in train_con:
+		a = []
+		b = []
+		x[i] = a
+		y[i] = b
+	for line in all_data:
+		if line[-2] in train_con:
+			x[line[-2]].append(line[:-2])
+			y[line[-2]].append(line[-1])
+		elif line[-2] in test_con:
+			test_x.append(line[:-2])
+			test_y.append(line[-1])
+		else:
+			print(line)
+	#print(len(x))
+	return x, y, test_x, test_y
 
 
-train_data = np.load('../course_train.npy')
-#test_data = np.load('../test_data.npy')
-
-def get_train_data(context):	
-	x = []
-	y = []
-	test = []
-	test_label = []
-	test_context = train_data[0][-2]
-	for line in train_data:
-		if line[-2] == test_context:
-			test.append(line[:-2])
-			test_label.append(line[-1])
-		elif line[-2]%3 == context:
-			x.append(line[:-2])
-			y.append(line[-1])
-	return x, y
-
-def get_test_data():
-	x = []
-	y = []
-	test_context = train_data[0][-2]
-	for line in train_data:
-		if line[-2] == test_context:
-			x.append(line[:-2])
-			y.append(line[-1])
-	return x, y, test_context
-
-def ensemble():
-	test, test_label, test_context = get_test_data()
+def ensemble(t_num):
+	x, y, test, test_label = get_data()
 	pred = []
 	pred_test = []
-	for i in range(3):
-		#if i != (test_context%3):
-		train, label = get_train_data(i)
-			#clf = tree.DecisionTreeClassifier()
-		clf = svm.LinearSVC()
-		clf = clf.fit(train, label)
-		predi = clf.predict(test)
-		pred.append(predi)
-		acc = 0
-		for j in range(len(test_label)):
-			if test_label[j]==predi[j]:
-				acc += 1
-		print("train " + str(i) + " acc:", acc/len(test_label))
+	index = 0
+	t_index = 0
+	train = []
+	label = []
+	for i in x:
+		index += 1
+		t_index += 1
+		train = train + x[i]
+		label = label + y[i]
+		if index==t_num or t_index==7:
+			index = 0
+			clf = svm.LinearSVC(max_iter=5000)
+			clf = clf.fit(train, label)
+			predi = clf.predict(test)
+			pred.append(predi)
+			acc = 0
+			for j in range(len(test_label)):
+				if test_label[j]==predi[j]:
+					acc += 1
+			print("train " + str(i) + " acc:", acc/len(test_label))
+			train = []
+			label = []
+
 	for i in range(len(pred[0])):
 		l = [0]*10
 		for j in range(len(pred)):
@@ -64,6 +80,38 @@ def ensemble():
 		if test_label[i]==pred_test[i]:
 			acc_t += 1
 	print("ensemble acc:", acc_t/len(test_label) )
+	return acc_t/len(test_label)
 
 if __name__ == "__main__":
-	ensemble()
+	'''
+	dc = {}
+	dl = {}
+	for line in all_data:
+		if line[-1]==0:
+			try:
+				a = dc[line[-2]]
+			except:
+				print('context:', line[-2])
+			dc[line[-2]] = True
+		try:
+			b = dl[line[-1]]
+		except:
+			print('label:', line[-1])
+			dl[line[-1]] = True
+	'''
+	acc_ave = 0
+	max_acc = 0
+	min_acc = 1
+	t_num = 0
+	if len(sys.argv) < 2:
+		t_num = 1
+	else:
+		t_num = sys.argv[1]
+	print(t_num)
+	for i in range(5):
+		acc_i = ensemble(int(t_num))
+		min_acc = min(acc_i, min_acc)
+		max_acc = max(acc_i, max_acc)
+		acc_ave += acc_i
+	acc_ave /= 5
+	print("average acc:", acc_ave, "max_acc:", max_acc, "min_acc", min_acc)
