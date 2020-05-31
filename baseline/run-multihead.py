@@ -42,12 +42,12 @@ if __name__ == "__main__":
         print("-----epoch[{}]-----".format(epoch))
 
         (X, Y, C) = test_data(test=1)
-        correct1 = (torch.argmax(net.forward1(X), dim=1).float() == Y).sum().float()
-        correct2 = (torch.argmax(net.forward2(X), dim=1).float() == C).sum().float()
+        correct1 = (torch.argmax(net.forward1(X), dim=1).float() == Y.float()).sum().float()
+        correct2 = (torch.argmax(net.forward2(X), dim=1).float() == C.float()).sum().float()
         print("test acc =", correct1 / len(Y), "test C acc =", correct2 / len(C))
 
         (X, Y, C) = train_data(test=1)
-        correct1 = (torch.argmax(net.forward1(X), dim=1).float() == Y).sum().float()
-        correct2 = (torch.argmax(net.forward2(X), dim=1).float() == C).sum().float()
+        correct1 = (torch.argmax(net.forward1(X), dim=1).float() == Y.float()).sum().float()
+        correct2 = (torch.argmax(net.forward2(X), dim=1).float() == C.float()).sum().float()
 
         print("train acc =", correct1 / len(Y), "train C acc =", correct2 / len(C))
