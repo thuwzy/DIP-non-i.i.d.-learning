@@ -3,22 +3,23 @@ import utils
 import torch
 import torch.utils.data as Data
 
-test = 0
+final = 1
 data = np.load("../course_train.npy")[:utils.train_size]
+data_test = np.load("../test_data.npy")[:1200]
 
 def process_data():
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])                                          # Resnet features
-    if test == 0:
+    if final == 0:
         _X=X[((C+Y)%2).nonzero()].squeeze(1)
         _Y=Y[((C+Y)%2).nonzero()]
         _C=C[((C+Y)%2).nonzero()]
     else:
         _len = len(C)
-        _X = torch.Tensor(data[::2, :-2])
-        _Y = torch.LongTensor(data[::2, -1]).unsqueeze(1) 
-        _C = torch.LongTensor(data[::2, -2]).unsqueeze(1) 
+        _X=X[(((C+Y)%1)+1).nonzero()].squeeze(1)
+        _Y=Y[(((C+Y)%1)+1).nonzero()]
+        _C=C[(((C+Y)%1)+1).nonzero()]
 
 
     _len = len(_Y)
@@ -30,32 +31,35 @@ def train_data():
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])                                          # Resnet features
-    if test == 0:
+    if final == 0:
         _X=X[((C+Y)%2).nonzero()].squeeze(1)
         _Y=Y[((C+Y)%2).nonzero()].squeeze(1)
         _C=C[((C+Y)%2).nonzero()].squeeze(1)
     else:
         _len = len(C)
-        _X = torch.Tensor(data[::2, :-2])
-        _Y = torch.LongTensor(data[::2, -1])   
-        _C = torch.LongTensor(data[::2, -2])       
+        _X=X[(((C+Y)%1)+1).nonzero()].squeeze(1)
+        _Y=Y[(((C+Y)%1)+1).nonzero()].squeeze(1)
+        _C=C[(((C+Y)%1)+1).nonzero()].squeeze(1)
     return (_X, _Y, _C)
 
 def test_data():
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])                                          # Resnet features
-    if test == 0:
+    if final == 0:
         _X=X[((C+Y+1)%2).nonzero()].squeeze(1)
         _Y=Y[((C+Y+1)%2).nonzero()].squeeze(1)
         _C=C[((C+Y+1)%2).nonzero()].squeeze(1)
     else:
         _len = len(C)
-        _X = torch.Tensor(data[1::2, :-2])
-        _Y = torch.LongTensor(data[1::2, -1])   
-        _C = torch.LongTensor(data[1::2, -2]) 
+        _X=X[(((C+Y)%1)+1).nonzero()].squeeze(1)
+        _Y=Y[(((C+Y)%1)+1).nonzero()].squeeze(1)
+        _C=C[(((C+Y)%1)+1).nonzero()].squeeze(1)
     return (_X, _Y, _C)
 
+def final_test_data():
+    X = torch.Tensor(data_test[:, :])
+    return X
 
 def load_data():
     X, Y, C = process_data()

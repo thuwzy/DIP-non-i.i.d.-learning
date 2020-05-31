@@ -3,7 +3,7 @@ from torch.autograd import Variable
 import utils
 import niid
 from random import random
-from data_loader import load_data, process_data, test_data, train_data
+from data_loader import load_data, process_data, test_data, train_data, final_test_data
 
 if __name__ == "__main__":
     net = niid.NIIDNet()
@@ -59,3 +59,10 @@ if __name__ == "__main__":
         correct2 = (torch.argmax(net.forward2(X), dim=1).float() == C).sum().float()
 
         print("train acc =", correct1 / len(Y), "train C acc =", correct2 / len(C))
+    
+    D=final_test_data()
+    scores = torch.argmax(net.forward1(D), dim=1)
+    f=open("submit.txt","w+")
+    for i in scores:
+        f.write(str(int(i))+"\n")
+    f.close()
