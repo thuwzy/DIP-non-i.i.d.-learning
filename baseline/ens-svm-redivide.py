@@ -34,7 +34,7 @@ def get_data():
 	# 加入负例
 	for line in all_data:
 		for i in range(10):
-			if i != line[-1]:
+			if (i != line[-1]) and (line[-2] in x[i]):
 				r = random.randint(0,9)
 				if r==i:
 					for j in x[i].keys():
@@ -45,7 +45,6 @@ def get_data():
 
 
 def ensemble(x, y, x_test, y_test):
-	#prob =np.array([[0]*len(y_test)]*10)
 	prob = []
 	for i in range(10):
 		a = []
@@ -74,8 +73,9 @@ def ensemble(x, y, x_test, y_test):
 				ml = j
 		if ml == y_test[i]:
 			acc += 1
-	return acc/len(y_test)
 	print('ensemble acc:', acc/len(y_test))
+	return acc/len(y_test)
+
 
 if __name__ == '__main__':
 	max_acc = 0
