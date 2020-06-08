@@ -12,7 +12,7 @@ def split(X, Y, C):
     Y_val = torch.Tensor().long()
     C_train = torch.Tensor().long()
     C_val = torch.Tensor().long()
-    
+
     for i_label in range(utils.class_size):
         appear_contexts = C[Y == i_label].unique()
         train_contexts = appear_contexts[:5]
@@ -31,24 +31,53 @@ def split(X, Y, C):
     return X_train, X_val, Y_train, Y_val, C_train, C_val
 
 
-def split_validation():
+def split_validation(ensemble=False):
     X = torch.Tensor(data[:, :-2])
     Y = torch.LongTensor(data[:, -1])   
     C = torch.LongTensor(data[:, -2])
 
     X_train, X_val, Y_train, Y_val, C_train, C_val = split(X, Y, C)
     
-    _len = len(Y_train)
-    Y_scatter = torch.zeros(_len, utils.class_size).scatter_(1, Y_train.unsqueeze(1), 1)
-    C_scatter = torch.zeros(_len, utils.class_size).scatter_(1, C_train.unsqueeze(1), 1)
-    torch_dataset = Data.TensorDataset(X_train, Y_scatter, C_scatter)
-    loader = Data.DataLoader(
-        dataset=torch_dataset,
-        batch_size=utils.batch_size,
-        shuffle=True,
-    )
+    if not ensemble:
+        _len = len(Y_train)
+        Y_scatter = torch.zeros(_len, utils.class_size).scatter_(1, Y_train.unsqueeze(1), 1)
+        C_scatter = torch.zeros(_len, utils.class_size).scatter_(1, C_train.unsqueeze(1), 1)
+        torch_dataset = Data.TensorDataset(X_train, Y_scatter, C_scatter)
+        loader = Data.DataLoader(
+            dataset=torch_dataset,
+            batch_size=utils.batch_size,
+            shuffle=True,
+        )
 
-    return loader, (X_train, Y_train, C_train), (X_val, Y_val, C_val)
+        return loader, (X_train, Y_train, C_train), (X_val, Y_val, C_val)
+    
+    loaders = []
+    for i in range(5):
+        X_i = torch.Tensor()
+        Y_i = torch.Tensor().long()
+        C_i = torch.Tensor().long()
+
+        for i_label in range(utils.class_size):
+            appear_contexts = C[Y == i_label].unique()
+            train_contexts = appear_contexts[:5]
+            train_contexts = train_contexts[torch.arange(len(train_contexts))!=i]
+            for c in train_contexts:
+                X_i = torch.cat((X_i, X[(Y == i_label) & (C == c)]))
+                Y_i = torch.cat((Y_i, Y[(Y == i_label) & (C == c)]))
+                C_i = torch.cat((C_i, C[(Y == i_label) & (C == c)]))
+        
+        _len = len(Y_i)
+        Y_scatter = torch.zeros(_len, utils.class_size).scatter_(1, Y_i.unsqueeze(1), 1)
+        C_scatter = torch.zeros(_len, utils.class_size).scatter_(1, C_i.unsqueeze(1), 1)
+        torch_dataset = Data.TensorDataset(X_i, Y_scatter, C_scatter)
+        loader = Data.DataLoader(
+            dataset=torch_dataset,
+            batch_size=utils.batch_size,
+            shuffle=True,
+        )
+        loaders.append(loader)
+    
+    return loaders, (X_train, Y_train, C_train), (X_val, Y_val, C_val)
     
 
 if __name__ == "__main__":

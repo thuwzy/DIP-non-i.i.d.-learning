@@ -2,10 +2,12 @@ import torch
 
 import niid
 import utils
-from data_loader import load_data_by_context, train_data, test_data
+from data_loader import split_validation
 
 if __name__ == "__main__":
-    loaders = load_data_by_context()
+    loaders, train_tuple, val_tuple = split_validation(ensemble=True)
+    X_test, Y_test, _ = val_tuple
+    X_train, Y_train, _ = train_tuple
 
     nets = []
     optimizers = []
@@ -15,8 +17,6 @@ if __name__ == "__main__":
         optimizers.append(torch.optim.Adam(nets[i].parameters(), lr=utils.lr))
     
     for epoch in range(utils.epoch):
-        (X_test, Y_test, _) = test_data(test=0)
-        (X_train, Y_train, _) = train_data(test=0)
 
         preds_test = torch.LongTensor([])
         preds_train = torch.LongTensor([])
