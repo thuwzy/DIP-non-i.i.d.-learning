@@ -3,6 +3,7 @@ from torch.autograd import Variable
 import utils
 import niid
 from data_loader import split_validation
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     net = niid.NIIDNet()
@@ -14,6 +15,11 @@ if __name__ == "__main__":
     CELoss = torch.nn.CrossEntropyLoss()    
     softmax = torch.nn.Softmax(dim=1)
     loader, train_tuple, val_tuple = split_validation()
+
+    val_accs = []
+    train_accs = []
+    val_accs_c = []
+    train_accs_c = []
 
     for epoch in range(utils.epoch):
         if epoch >50:
@@ -46,10 +52,26 @@ if __name__ == "__main__":
         correct1 = (torch.argmax(net.forward1(X), dim=1).float() == Y.float()).sum().float()
         correct2 = (torch.argmax(net.forward2(X), dim=1).float() == C.float()).sum().float()
         print("test acc =", correct1 / len(Y), "test C acc =", correct2 / len(C))
+        val_accs.append(correct1 / len(Y))
+        val_accs_c.append(correct2 / len(C))
 
         # (X, Y, C) = train_data(test=1)
         X, Y, C = train_tuple
         correct1 = (torch.argmax(net.forward1(X), dim=1).float() == Y.float()).sum().float()
         correct2 = (torch.argmax(net.forward2(X), dim=1).float() == C.float()).sum().float()
-
         print("train acc =", correct1 / len(Y), "train C acc =", correct2 / len(C))
+        train_accs.append(correct1 / len(Y))
+        train_accs_c.append(correct2 / len(C))
+
+    epochs = range(utils.epoch)
+    plt.style.use('seaborn')
+    plt.plot(epochs, train_accs, 'forestgreen', label='Training accuracy (Label)')
+    plt.plot(epochs, val_accs, 'royalblue', label='Validation accuracy (Label)')
+    plt.plot(epochs, train_accs_c, 'limegreen', label='Training accuracy (Context)')
+    plt.plot(epochs, val_accs_c, 'deepskyblue', label='Validation accuracy (Context)')
+    plt.title('Training and Validation Accuracy of Labels and Contexts')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
+    plt.tight_layout()
+    plt.show()

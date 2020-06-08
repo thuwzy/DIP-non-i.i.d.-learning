@@ -2,7 +2,7 @@ import torch
 from torch.autograd import Variable
 import utils
 import niid
-from data_loader import load_data, process_data, test_data, train_data
+from data_loader import split_validation
 
 EPOCH = 100
 
@@ -10,9 +10,8 @@ if __name__ == "__main__":
     net = niid.FCNet()
     print(net.parameters())
     optimizer_net = torch.optim.Adam(net.parameters(), lr=utils.lr)
-    # lossp = niid.Lossp(utils.lam)
 
-    loader = load_data()
+    loader, train_tuple, val_tuple = split_validation()
     for epoch in range(EPOCH):
         for step, (x, y, _) in enumerate(loader):
             output = net(x)
@@ -21,39 +20,16 @@ if __name__ == "__main__":
             optimizer_net.zero_grad()
             loss.backward()
             optimizer_net.step()
-            # output = net(x)
-            # lossb = niid.Lossb(utils.batch_size, utils.alpha)
-            # optimizer_w = torch.optim.RMSprop([lossb.wn], lr=utils.lr_w)
-            # wfi = Variable(net.wfi, requires_grad=False)
-            
-            # for i in range(utils.rounds_w):
-            #     loss = lossb(wfi, x)
-            #     optimizer_w.zero_grad()
-            #     loss.backward()
-            #     optimizer_w.step()
-            #     d = lossb.update()
-            #     print(loss)
-            #     if d < utils.threshold:
-            #         break
-            
-            # # print(lossb.W)
-            # w = Variable(lossb.W, requires_grad=False)
-            # loss = lossp(wfi, output, y, w)
-            # optimizer_net.zero_grad()
-            # loss.backward()
-            # optimizer_net.step()
-
-            #print("epoch {} step {}, loss = {}".format(epoch, step, loss)) 
         
         print("-----epoch[{}]-----".format(epoch))
-        (X, Y, _) = test_data()
+        (X, Y, _) = val_tuple
         output = net(X)
         prediction = torch.argmax(output, dim=1).float()
         correct = (prediction == Y.float()).sum().float()
 
         print("test acc =", correct / len(Y))
 
-        (X, Y, _) = train_data()
+        (X, Y, _) = train_tuple
         output = net(X)
         prediction = torch.argmax(output, dim=1).float()
         correct = (prediction == Y.float()).sum().float()
