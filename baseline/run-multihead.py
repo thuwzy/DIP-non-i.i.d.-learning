@@ -2,7 +2,7 @@ import torch
 from torch.autograd import Variable
 import utils
 import niid
-from data_loader import load_data, test_data, train_data
+from data_loader import split_validation
 
 if __name__ == "__main__":
     net = niid.NIIDNet()
@@ -13,7 +13,7 @@ if __name__ == "__main__":
     net.warm()
     CELoss = torch.nn.CrossEntropyLoss()    
     softmax = torch.nn.Softmax(dim=1)
-    loader = load_data(test=1)
+    loader, train_tuple, val_tuple = split_validation()
 
     for epoch in range(utils.epoch):
         if epoch >50:
@@ -41,12 +41,14 @@ if __name__ == "__main__":
         
         print("-----epoch[{}]-----".format(epoch))
 
-        (X, Y, C) = test_data(test=1)
+        # (X, Y, C) = test_data(test=1)
+        X, Y, C = val_tuple
         correct1 = (torch.argmax(net.forward1(X), dim=1).float() == Y.float()).sum().float()
         correct2 = (torch.argmax(net.forward2(X), dim=1).float() == C.float()).sum().float()
         print("test acc =", correct1 / len(Y), "test C acc =", correct2 / len(C))
 
-        (X, Y, C) = train_data(test=1)
+        # (X, Y, C) = train_data(test=1)
+        X, Y, C = train_tuple
         correct1 = (torch.argmax(net.forward1(X), dim=1).float() == Y.float()).sum().float()
         correct2 = (torch.argmax(net.forward2(X), dim=1).float() == C.float()).sum().float()
 
