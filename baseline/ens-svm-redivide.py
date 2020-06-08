@@ -19,7 +19,8 @@ def get_data():
 	# 加入正例
 	for line in all_data:
 		if line[-2] not in x[line[-1]]:
-			if len(x[line[-1]]) >= 5:
+			if (line[-1]+line[-2])%2==1:
+			#if len(x[line[-1]]) >= 5:
 				x_test.append(line[:-2])
 				y_test.append(line[-1])
 			else:
@@ -54,7 +55,7 @@ def ensemble(x, y, x_test, y_test):
 	count = 0
 	for i in range(10):
 		for j in x[i].keys():
-			#clf = tree.DecisionTreeClassifier()
+			#clf = tree.DecisionTreeClassifier(max_depth=50)
 			clf = svm.LinearSVC()
 			clf = clf.fit(x[i][j], y[i][j])
 			p = clf.predict(x_test)
@@ -76,17 +77,38 @@ def ensemble(x, y, x_test, y_test):
 	print('ensemble acc:', acc/len(y_test))
 	return acc/len(y_test)
 
+def pure_svm():
+	'''xx = []
+	yy = []
+	for i in range(10):
+		for j in x[i].keys():
+			xx = xx + x[i][j]
+			for k in range(len(x[i][j])):
+				yy.append(i)'''
+	X = all_data[:,:-2]
+	Y = all_data[:,-1]
+	C = all_data[:,-2]
+	xx = X [(C+Y)%2 == 0]
+	yy = Y [(C+Y)%2 == 0]
+	x_test = X [(C+Y)%2 == 1]
+	y_test = Y [(C+Y)%2 == 1]
+	clf = svm.LinearSVC()
+	clf = clf.fit(xx, yy)
+	pred = clf.predict(x_test)
+	acc = (pred == y_test).sum() / len(y_test)
+	print('pure svm acc:', acc)
 
 if __name__ == '__main__':
 	max_acc = 0
 	min_acc = 1
 	ave_acc = 0
-	for i in range(5):
+	'''for i in range(5):
 		x, y, x_test, y_test = get_data()
 		acc = ensemble(x, y, x_test, y_test)
 		max_acc = max(acc, max_acc)
 		min_acc = min(acc, min_acc)
 		ave_acc += acc
-	print('max:', max_acc, "min:", min_acc, "average:", ave_acc/5)
+	print('max:', max_acc, "min:", min_acc, "average:", ave_acc/5)'''
+	pure_svm()
 	#pure_svr(x, y, x_test, y_test)
 
